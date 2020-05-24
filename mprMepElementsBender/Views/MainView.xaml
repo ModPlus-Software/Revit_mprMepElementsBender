@@ -1,0 +1,158 @@
+﻿<mps:ModPlusWindow x:Class="mprMepElementsBender.Views.MainView"
+                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                   xmlns:viewModels="clr-namespace:mprMepElementsBender.ViewModels"
+                   xmlns:mps="https://modplus.org/winfx/xaml/controls"
+                   mc:Ignorable="d"
+                   d:DataContext="{d:DesignInstance viewModels:MainViewModel, d:IsDesignTimeCreatable=False}"
+                   d:DesignHeight="230" d:DesignWidth="400"
+                   MinHeight="230" MinWidth="400" ResizeMode="CanMinimize"
+                   WindowStartupLocation="CenterScreen"
+                   Topmost="True">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/ModPlusStyle;component/Styles/Controls.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <XmlDataProvider x:Key="Lang" Source="F:/ModPlus/Languages/en-US.xml" XPath="ModPlus/mprMepElementsBender" />
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.15*"/>
+            <RowDefinition Height="0.70*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="0.55*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="0.45*"/>
+        </Grid.ColumnDefinitions>
+
+        <!-- Headers & separator -->
+        <TextBlock Grid.Row="0" Grid.Column="0"
+                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                   Text="{Binding Source={StaticResource Lang}, XPath=h1}"/>
+        <Rectangle Grid.Row="0" Grid.Column="1" Grid.RowSpan="3"
+                   VerticalAlignment="Stretch"
+                   Width="1" Margin="2" Stroke="LightGray" />
+        <TextBlock Grid.Row="0" Grid.Column="2" 
+                   VerticalAlignment="Center" HorizontalAlignment="Center"
+                   Text="{Binding Source={StaticResource Lang}, XPath=h2}"/>
+
+        <!-- Settings & categories -->
+        <Grid Grid.Row="1" Grid.Column="0">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.45*"/>
+                <ColumnDefinition Width="0.55*"/>
+            </Grid.ColumnDefinitions>
+            <TextBlock Grid.Row="0" Grid.Column="0" Margin="5" Text="{Binding Source={StaticResource Lang}, XPath=m1}"/>
+            <mps:NumericBox Grid.Row="0" Grid.Column="1"
+                            Speedup="True" Minimum="0"
+                            Value="{Binding Path=Offset, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <TextBlock Grid.Row="1" Grid.Column="0" Margin="5" Text="{Binding Source={StaticResource Lang}, XPath=m2}"/>
+            <mps:NumericBox Grid.Row="1" Grid.Column="1"
+                            Speedup="True" Minimum="5" Maximum="90" Interval="5"
+                            Value="{Binding Path=Angle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
+            <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="0.8*"/>
+                    <ColumnDefinition Width="0.2*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Grid.Column="0" Margin="5" Text="{Binding Source={StaticResource Lang}, XPath=m3}"/>
+                <Button Grid.Column="1" BorderThickness="0" Background="Transparent"
+                        Command="{Binding Path=SelectCategoriesCommand}">
+                    <Viewbox Width="24" Height="24">
+                        <Canvas Width="24" Height="24">
+                            <Path Fill="Black"
+                              Data="M2,6V8H14V6H2M2,10V12H14V10H2M20.04,10.13C19.9,10.13 19.76,10.19 19.65,10.3L18.65,11.3L20.7,13.35L21.7,12.35C21.92,12.14 21.92,11.79 21.7,11.58L20.42,10.3C20.31,10.19 20.18,10.13 20.04,10.13M18.07,11.88L12,17.94V20H14.06L20.12,13.93L18.07,11.88M2,14V16H10V14H2Z" />
+                        </Canvas>
+                    </Viewbox>
+                </Button>
+            </Grid>
+        </Grid>
+
+        <!-- Alignment elements -->
+        <Grid Grid.Row="2" Column="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="0.8*"/>
+                <ColumnDefinition Width="0.2*"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0"
+                    HorizontalAlignment="Stretch"
+                    Content="{Binding Source={StaticResource Lang}, XPath=m10}" Command="{Binding Path=SelectElementsCommand}"
+                    Name="SelectAlignElementsBtn"/>
+            <Button Grid.Column="1" BorderThickness="0" Background="Transparent"
+                    Command="{Binding Path=ClearSelectedElementsCommand}">
+                <Viewbox Width="24" Height="24">
+                    <Canvas Width="24" Height="24">
+                        <Path Fill="Black" Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" />
+                    </Canvas>
+                </Viewbox>
+            </Button>
+        </Grid>
+
+        <!-- Bending directions -->
+        <Grid Row="1" Grid.Column="2">
+            <Grid.RowDefinitions>
+                <RowDefinition/>
+                <RowDefinition/>
+            </Grid.RowDefinitions>
+            <GroupBox Grid.Row="0" Header="{Binding Source={StaticResource Lang}, XPath=m4}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="{Binding Source={StaticResource Lang}, XPath=m6}"/>
+                    <RadioButton Grid.Column="1" Name="Up"
+                                 VerticalAlignment="Center" HorizontalAlignment="Center"
+                                 Command="{Binding Path=BendingDirectionCommand}"
+                                 CommandParameter="{Binding ElementName=Up, Path=Name}"
+                                 IsChecked="True"/>
+                    <TextBlock Grid.Column="2" Text="{Binding Source={StaticResource Lang}, XPath=m7}"/>
+                    <RadioButton Grid.Column="3" Name="Down"
+                                 VerticalAlignment="Center" HorizontalAlignment="Center"
+                                 Command="{Binding Path=BendingDirectionCommand}"
+                                 CommandParameter="{Binding ElementName=Down, Path=Name}"/>
+                </Grid>
+            </GroupBox>
+
+            <GroupBox Grid.Row="1" Header="{Binding Source={StaticResource Lang}, XPath=m5}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                        <ColumnDefinition/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Text="{Binding Source={StaticResource Lang}, XPath=m8}"/>
+                    <RadioButton Grid.Column="1" Name="Left"
+                                 VerticalAlignment="Center" HorizontalAlignment="Center"
+                                 Command="{Binding Path=BendingDirectionCommand}"
+                                 CommandParameter="{Binding ElementName=Left, Path=Name}"
+                                 IsChecked="True"/>
+                    <TextBlock Grid.Column="2" Text="{Binding Source={StaticResource Lang}, XPath=m9}"/>
+                    <RadioButton Grid.Column="3" Name="Right"
+                                 VerticalAlignment="Center" HorizontalAlignment="Center"
+                                 Command="{Binding Path=BendingDirectionCommand}"
+                                 CommandParameter="{Binding ElementName=Right, Path=Name}"/>
+                </Grid>
+            </GroupBox>
+        </Grid>
+
+        <!-- Run -->
+        <Button Grid.Row="2" Grid.Column="2"
+                HorizontalAlignment="Stretch" Content="{Binding Source={StaticResource Lang}, XPath=m12}"
+                Command="{Binding Path=BendCommand}"/>
+    </Grid>
+</mps:ModPlusWindow>

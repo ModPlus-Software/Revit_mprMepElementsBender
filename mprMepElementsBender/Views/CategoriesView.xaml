@@ -1,0 +1,49 @@
+﻿<mps:ModPlusWindow x:Class="mprMepElementsBender.Views.CategoriesView"
+                   xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                   xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                   xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+                   xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                   xmlns:mps="https://modplus.org/winfx/xaml/controls"
+                   xmlns:viewModels="clr-namespace:mprMepElementsBender.ViewModels"
+                   mc:Ignorable="d"
+                   d:DataContext="{d:DesignInstance viewModels:CategoriesViewModel, d:IsDesignTimeCreatable=False}"
+                   d:DesignHeight="200" d:DesignWidth="200"
+                   MinHeight="200" MinWidth="200"
+                   WindowStartupLocation="CenterScreen"
+                   Topmost="True">
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="pack://application:,,,/ModPlusStyle;component/Styles/Controls.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+            <XmlDataProvider x:Key="Lang" Source="F:/ModPlus/Languages/en-US.xml" XPath="ModPlus/mprMepElementsBender" />
+        </ResourceDictionary>
+    </Window.Resources>
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="0.8*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <ListView Grid.Row="0" ItemsSource="{Binding Path=Categories}">
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <CheckBox IsChecked="{Binding Path=IsChecked}">
+                        <TextBlock Text="{Binding Path=Name}"/>
+                    </CheckBox>
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition/>
+                <ColumnDefinition/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0"
+                    Content="{Binding Source={StaticResource Lang}, XPath=m13}"
+                    Command="{Binding ApplyCommand}"/>
+            <Button Grid.Column="1"
+                    Content="{Binding Source={StaticResource Lang}, XPath=m14}"
+                    Command="{Binding CancelCommand}"/>
+        </Grid>
+    </Grid>
+</mps:ModPlusWindow>
