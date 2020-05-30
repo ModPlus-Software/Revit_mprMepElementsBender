@@ -24,5 +24,5 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyDescription("2021")]
 #endif
 
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("1.0.1.0")]
+[assembly: AssemblyFileVersion("1.0.1.0")]

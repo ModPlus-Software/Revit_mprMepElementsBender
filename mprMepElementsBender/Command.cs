@@ -19,6 +19,9 @@
         {
             try
             {
+#if !DEBUG
+                ModPlusAPI.Statistic.SendCommandStarting(ModPlusConnector.Instance);
+#endif
                 if (MainView.IsOpen)
                     return Result.Cancelled;
 
