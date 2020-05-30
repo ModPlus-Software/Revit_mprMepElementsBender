@@ -32,6 +32,9 @@
 #elif R2020
         /// <inheritdoc />
         public string AvailProductExternalVersion => "2020";
+#elif R2021
+        /// <inheritdoc />
+        public string AvailProductExternalVersion => "2021";
 #endif
 
         /// <inheritdoc />
@@ -59,7 +62,7 @@
         public bool CanAddToRibbon => true;
 
         /// <inheritdoc />
-        public string FullDescription => "Выполняет обход пересекаемых MEP элементов";
+        public string FullDescription => "Плагин позволяет создавать обход MEP элементов, не производя их постоянный выбор из окна плагина: для этого сначала нужно выбрать пересекаемые элементы (т.е. те элементы, которые требуется обойти), а затем просто выбирать нужные элементы в модели. При этом в окне плагина будет происходить автоматическое добавление элементов в список обрабатываемых";
 
         /// <inheritdoc />
         public string ToolTipHelpImage => string.Empty;
@@ -81,8 +84,5 @@
 
         /// <inheritdoc />
         public List<string> SubClassNames => new List<string>();
-
-        /// <inheritdoc />
-        public string AvailProductExternalVersion => string.Empty;
     }
 }

@@ -9,27 +9,52 @@
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>mprMepElementsBender</RootNamespace>
     <AssemblyName>mprMepElementsBender</AssemblyName>
-    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
+    <PlatformTarget>x64</PlatformTarget>
+    <DebugType>none</DebugType>
+    <CodeAnalysisRuleSet>$(SolutionDir)\ModPlus.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x64' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <OutputPath>bin\x64\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE;R2021</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <CodeAnalysisRuleSet>..\..\ModPlus.ruleset</CodeAnalysisRuleSet>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <DebugType>pdbonly</DebugType>
-    <Optimize>true</Optimize>
-    <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE</DefineConstants>
-    <ErrorReport>prompt</ErrorReport>
-    <WarningLevel>4</WarningLevel>
+  <!-- For Revit versions -->
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'R2017|x64'">
+    <OutputPath>bin\x64\R2017\</OutputPath>
+    <DefineConstants>TRACE;R2017</DefineConstants>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <AssemblyName>$(AssemblyName)_2017</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'R2018|x64'">
+    <OutputPath>bin\x64\R2018\</OutputPath>
+    <DefineConstants>TRACE;R2018</DefineConstants>
+    <TargetFrameworkVersion>v4.5.2</TargetFrameworkVersion>
+    <AssemblyName>$(AssemblyName)_2018</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'R2019|x64'">
+    <OutputPath>bin\x64\R2019\</OutputPath>
+    <DefineConstants>TRACE;R2019</DefineConstants>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <AssemblyName>$(AssemblyName)_2019</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'R2020|x64'">
+    <OutputPath>bin\x64\R2020\</OutputPath>
+    <DefineConstants>TRACE;R2020</DefineConstants>
+    <TargetFrameworkVersion>v4.7</TargetFrameworkVersion>
+    <AssemblyName>$(AssemblyName)_2020</AssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)' == 'R2021|x64'">
+    <OutputPath>bin\x64\R2021\</OutputPath>
+    <DefineConstants>TRACE;R2021</DefineConstants>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <AssemblyName>$(AssemblyName)_2021</AssemblyName>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="PresentationCore" />
@@ -37,11 +62,6 @@
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Xaml" />
-    <Reference Include="System.Xml.Linq" />
-    <Reference Include="System.Data.DataSetExtensions" />
-    <Reference Include="Microsoft.CSharp" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
     <Reference Include="WindowsBase" />
   </ItemGroup>
@@ -51,6 +71,7 @@
     <Compile Include="Helpers\Enums\BendingElementType.cs" />
     <Compile Include="Helpers\BendingSection.cs" />
     <Compile Include="Helpers\CategoriesSelectionFilter.cs" />
+    <Compile Include="Helpers\Enums\OnExceptionVariant.cs" />
     <Compile Include="Helpers\Enums\Orientation.cs" />
     <Compile Include="Helpers\Enums\Direction.cs" />
     <Compile Include="Helpers\Extensions.cs" />
@@ -63,6 +84,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="ViewModels\CategoriesViewModel.cs" />
     <Compile Include="ViewModels\MainViewModel.cs" />
+    <Compile Include="Views\BendErrorWindow.xaml.cs">
+      <DependentUpon>BendErrorWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\CategoriesView.xaml.cs">
       <DependentUpon>CategoriesView.xaml</DependentUpon>
     </Compile>
@@ -70,18 +94,62 @@
       <DependentUpon>MainView.xaml</DependentUpon>
     </Compile>
   </ItemGroup>
+  <!-- CHOOSE -->
+  <Choose>
+    <When Condition=" '$(Configuration)'=='R2017' ">
+      <ItemGroup>
+        <PackageReference Include="ModPlus.Revit.API.2017">
+          <Version>1.0.0</Version>
+          <ExcludeAssets>runtime</ExcludeAssets>
+        </PackageReference>
+      </ItemGroup>
+    </When>
+    <When Condition=" '$(Configuration)'=='R2018' ">
+      <ItemGroup>
+        <PackageReference Include="ModPlus.Revit.API.2018">
+          <Version>1.0.0</Version>
+          <ExcludeAssets>runtime</ExcludeAssets>
+        </PackageReference>
+      </ItemGroup>
+    </When>
+    <When Condition=" '$(Configuration)'=='R2019' ">
+      <ItemGroup>
+        <PackageReference Include="ModPlus.Revit.API.2019">
+          <Version>1.0.0</Version>
+          <ExcludeAssets>runtime</ExcludeAssets>
+        </PackageReference>
+      </ItemGroup>
+    </When>
+    <When Condition=" '$(Configuration)'=='R2020' ">
+      <ItemGroup>
+        <PackageReference Include="ModPlus.Revit.API.2020">
+          <Version>1.0.0</Version>
+          <ExcludeAssets>runtime</ExcludeAssets>
+        </PackageReference>
+      </ItemGroup>
+    </When>
+    <When Condition=" '$(Configuration)'=='R2021' or '$(Configuration)'=='Debug' ">
+      <ItemGroup>
+        <PackageReference Include="ModPlus.Revit.API.2021">
+          <Version>1.0.0</Version>
+          <ExcludeAssets>runtime</ExcludeAssets>
+        </PackageReference>
+      </ItemGroup>
+    </When>
+  </Choose>
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations">
       <Version>2019.1.3</Version>
-    </PackageReference>
-    <PackageReference Include="ModPlus.Revit.API.2020">
-      <Version>1.0.0</Version>
+      <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
     <PackageReference Include="ModPlusAPI">
-      <Version>1.5.0</Version>
+      <Version>3.1.0</Version>
+      <ExcludeAssets>runtime</ExcludeAssets>
     </PackageReference>
     <PackageReference Include="ModPlusStyle">
-      <Version>2.0.0</Version>
+      <Version>3.3.0</Version>
+      <ExcludeAssets>runtime</ExcludeAssets>
+      <IncludeAssets>compile; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="StyleCop.Analyzers">
       <Version>1.1.118</Version>
@@ -89,8 +157,11 @@
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
+    <Page Include="Views\BendErrorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\CategoriesView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -99,6 +170,11 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="Resources\mprMepElementsBender_16x16.png" />
+    <Resource Include="Resources\mprMepElementsBender_32x32.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

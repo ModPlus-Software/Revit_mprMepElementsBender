@@ -26,6 +26,11 @@
         public Element Element { get; }
 
         /// <summary>
+        /// Integer value of Element.Id
+        /// </summary>
+        public int Id => Element.Id.IntegerValue;
+
+        /// <summary>
         /// Тип изгибаемого элемента
         /// </summary>
         public BendingElementType ElementType { get; }

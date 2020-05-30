@@ -7,71 +7,76 @@
                    xmlns:mps="https://modplus.org/winfx/xaml/controls"
                    mc:Ignorable="d"
                    d:DataContext="{d:DesignInstance viewModels:MainViewModel, d:IsDesignTimeCreatable=False}"
-                   d:DesignHeight="230" d:DesignWidth="400"
-                   MinHeight="230" MinWidth="400" ResizeMode="CanMinimize"
-                   WindowStartupLocation="CenterScreen"
+                   ResizeMode="NoResize"
+                   WindowStartupLocation="CenterScreen" SizeToContent="WidthAndHeight"
                    Topmost="True">
     <Window.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/ModPlusStyle;component/Styles/Controls.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            <XmlDataProvider x:Key="Lang" Source="F:/ModPlus/Languages/en-US.xml" XPath="ModPlus/mprMepElementsBender" />
+            <XmlDataProvider x:Key="Lang" Source="E:/ModPlus/Languages/en-US.xml" XPath="ModPlus/mprMepElementsBender"/>
         </ResourceDictionary>
     </Window.Resources>
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="0.15*"/>
-            <RowDefinition Height="0.70*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="0.55*"/>
             <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="0.45*"/>
+            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
 
         <!-- Headers & separator -->
-        <TextBlock Grid.Row="0" Grid.Column="0"
+        <TextBlock Grid.Row="0" Grid.Column="0" Margin="{DynamicResource ModPlusDefaultMargin}"
                    VerticalAlignment="Center" HorizontalAlignment="Center"
                    Text="{Binding Source={StaticResource Lang}, XPath=h1}"/>
-        <Rectangle Grid.Row="0" Grid.Column="1" Grid.RowSpan="3"
-                   VerticalAlignment="Stretch"
-                   Width="1" Margin="2" Stroke="LightGray" />
-        <TextBlock Grid.Row="0" Grid.Column="2" 
+        <GridSplitter Grid.Row="0" Grid.Column="1" Grid.RowSpan="3" Margin="2 4"
+                      IsHitTestVisible="False"
+                      VerticalAlignment="Stretch" HorizontalAlignment="Center" 
+                      BorderBrush="{DynamicResource MidGrayBrush}" BorderThickness="1"/>
+        <TextBlock Grid.Row="0" Grid.Column="2" Margin="{DynamicResource ModPlusDefaultMargin}"
                    VerticalAlignment="Center" HorizontalAlignment="Center"
                    Text="{Binding Source={StaticResource Lang}, XPath=h2}"/>
 
         <!-- Settings & categories -->
         <Grid Grid.Row="1" Grid.Column="0">
             <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition/>
-                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="0.45*"/>
-                <ColumnDefinition Width="0.55*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <TextBlock Grid.Row="0" Grid.Column="0" Margin="5" Text="{Binding Source={StaticResource Lang}, XPath=m1}"/>
+            <TextBlock Grid.Row="0" Grid.Column="0" Margin="{DynamicResource ModPlusDefaultMargin}"
+                       Text="{Binding Source={StaticResource Lang}, XPath=m1}"/>
             <mps:NumericBox Grid.Row="0" Grid.Column="1"
                             Speedup="True" Minimum="0"
                             Value="{Binding Path=Offset, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
-            <TextBlock Grid.Row="1" Grid.Column="0" Margin="5" Text="{Binding Source={StaticResource Lang}, XPath=m2}"/>
+            <TextBlock Grid.Row="1" Grid.Column="0" Margin="{DynamicResource ModPlusDefaultMargin}"
+                       Text="{Binding Source={StaticResource Lang}, XPath=m2}"/>
             <mps:NumericBox Grid.Row="1" Grid.Column="1"
                             Speedup="True" Minimum="5" Maximum="90" Interval="5"
                             Value="{Binding Path=Angle, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"/>
             <Grid Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="0.8*"/>
-                    <ColumnDefinition Width="0.2*"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Margin="5" Text="{Binding Source={StaticResource Lang}, XPath=m3}"/>
-                <Button Grid.Column="1" BorderThickness="0" Background="Transparent"
+                <TextBlock Grid.Column="0" Margin="{DynamicResource ModPlusDefaultMargin}"
+                           Text="{Binding Source={StaticResource Lang}, XPath=m3}"/>
+                <Button Grid.Column="1" Style="{DynamicResource ModPlusFlatButton}"
+                        Padding="2" MinWidth="0" MinHeight="0"
                         Command="{Binding Path=SelectCategoriesCommand}">
                     <Viewbox Width="24" Height="24">
                         <Canvas Width="24" Height="24">
-                            <Path Fill="Black"
+                            <Path Fill="{DynamicResource BlackBrush}"
                               Data="M2,6V8H14V6H2M2,10V12H14V10H2M20.04,10.13C19.9,10.13 19.76,10.19 19.65,10.3L18.65,11.3L20.7,13.35L21.7,12.35C21.92,12.14 21.92,11.79 21.7,11.58L20.42,10.3C20.31,10.19 20.18,10.13 20.04,10.13M18.07,11.88L12,17.94V20H14.06L20.12,13.93L18.07,11.88M2,14V16H10V14H2Z" />
                         </Canvas>
                     </Viewbox>
@@ -82,18 +87,24 @@
         <!-- Alignment elements -->
         <Grid Grid.Row="2" Column="0">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="0.8*"/>
-                <ColumnDefinition Width="0.2*"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <Button Grid.Column="0"
                     HorizontalAlignment="Stretch"
-                    Content="{Binding Source={StaticResource Lang}, XPath=m10}" Command="{Binding Path=SelectElementsCommand}"
-                    Name="SelectAlignElementsBtn"/>
-            <Button Grid.Column="1" BorderThickness="0" Background="Transparent"
+                    Command="{Binding Path=SelectElementsCommand}">
+                <TextBlock>
+                    <Run Text="{Binding Source={StaticResource Lang}, XPath=m10}"></Run>
+                    <Run>(</Run><Run Text="{Binding Path=IntersectedElements.Count, Mode=OneWay}"></Run><Run>)</Run>
+                </TextBlock>
+            </Button>
+            <Button Grid.Column="1" Style="{DynamicResource ModPlusFlatButton}"
+                    Padding="2" MinWidth="0" MinHeight="0" Margin="0" VerticalAlignment="Center"
                     Command="{Binding Path=ClearSelectedElementsCommand}">
                 <Viewbox Width="24" Height="24">
                     <Canvas Width="24" Height="24">
-                        <Path Fill="Black" Data="M17.65,6.35C16.2,4.9 14.21,4 12,4A8,8 0 0,0 4,12A8,8 0 0,0 12,20C15.73,20 18.84,17.45 19.73,14H17.65C16.83,16.33 14.61,18 12,18A6,6 0 0,1 6,12A6,6 0 0,1 12,6C13.66,6 15.14,6.69 16.22,7.78L13,11H20V4L17.65,6.35Z" />
+                        <Path Fill="{DynamicResource BlackBrush}"
+                              Data="M19,4H15.5L14.5,3H9.5L8.5,4H5V6H19M6,19A2,2 0 0,0 8,21H16A2,2 0 0,0 18,19V7H6V19Z" />
                     </Canvas>
                 </Viewbox>
             </Button>
@@ -102,8 +113,8 @@
         <!-- Bending directions -->
         <Grid Row="1" Grid.Column="2">
             <Grid.RowDefinitions>
-                <RowDefinition/>
-                <RowDefinition/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             <GroupBox Grid.Row="0" Header="{Binding Source={StaticResource Lang}, XPath=m4}">
                 <Grid>
@@ -152,7 +163,13 @@
 
         <!-- Run -->
         <Button Grid.Row="2" Grid.Column="2"
-                HorizontalAlignment="Stretch" Content="{Binding Source={StaticResource Lang}, XPath=m12}"
-                Command="{Binding Path=BendCommand}"/>
+                HorizontalAlignment="Stretch"
+                IsEnabled="{Binding Path=IsEnabledBend}"
+                Command="{Binding Path=BendCommand}">
+            <TextBlock>
+                <Run Text="{Binding Source={StaticResource Lang}, XPath=m12}"></Run>
+                <Run>(</Run><Run Text="{Binding Path=ElementsToBend.Count, Mode=OneWay}"></Run><Run>)</Run>
+            </TextBlock>
+        </Button>
     </Grid>
 </mps:ModPlusWindow>

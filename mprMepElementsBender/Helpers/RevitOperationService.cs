@@ -12,6 +12,7 @@
     using Enums;
     using Models;
     using ModPlusAPI.Windows;
+    using Views;
 
     /// <summary>
     /// Сервис работы с документом Revit
@@ -54,7 +55,11 @@
         /// <returns>Значение в миллиметрах</returns>
         public static double ToMillimeters(double inches)
         {
+#if R2016 || R2017 || R2018 || R2019 || R2020
             return UnitUtils.ConvertFromInternalUnits(inches, DisplayUnitType.DUT_MILLIMETERS);
+#else
+            return UnitUtils.ConvertFromInternalUnits(inches, UnitTypeId.Millimeters);
+#endif
         }
 
         /// <summary>
@@ -64,20 +69,11 @@
         /// <returns>Значение в дюймах</returns>
         public static double ToInches(double millimeters)
         {
+#if R2016 || R2017 || R2018 || R2019 || R2020
             return UnitUtils.ConvertToInternalUnits(millimeters, DisplayUnitType.DUT_MILLIMETERS);
-        }
-
-        /// <summary>
-        /// Получает выбранные элементы модели
-        /// </summary>
-        /// <returns>Список выбранных элементов модели</returns>
-        public List<CustomElement> GetSelectedElements()
-        {
-            var selectedElementIds = _uiApplication.ActiveUIDocument.Selection.GetElementIds();
-
-            return selectedElementIds
-                .Select(elementId => new CustomElement(_doc.GetElement(elementId)))
-                .ToList();
+#else
+            return UnitUtils.ConvertToInternalUnits(millimeters, UnitTypeId.Millimeters);
+#endif
         }
 
         /// <summary>
@@ -85,25 +81,42 @@
         /// </summary>
         /// <param name="allowedCategories">Список разрешенных категорий</param>
         /// <returns>Список выбранных элементов модели</returns>
-        public List<CustomElement> SelectElements(IEnumerable<ElementCategory> allowedCategories)
+        public IEnumerable<CustomElement> SelectElements(IEnumerable<ElementCategory> allowedCategories)
         {
-            try
+            var selectedElementRefs = _uiApplication.ActiveUIDocument.Selection.PickObjects(
+                ObjectType.Element,
+                new CategoriesSelectionFilter(allowedCategories),
+                ModPlusAPI.Language.GetItem(_langItem, "m19"));
+
+            _uiApplication.ActiveUIDocument.Selection.SetElementIds(new List<ElementId>());
+
+            foreach (var customElement in selectedElementRefs
+                .Select(reference =>
+                    new CustomElement(_doc.GetElement(reference.ElementId))))
             {
-                var selectedElementRefs = _uiApplication.ActiveUIDocument.Selection.PickObjects(
-                    ObjectType.Element,
-                    new CategoriesSelectionFilter(allowedCategories),
-                    ModPlusAPI.Language.GetItem(_langItem, "m19"));
-
-                _uiApplication.ActiveUIDocument.Selection.SetElementIds(new List<ElementId>());
-
-                return selectedElementRefs
-                    .Select(reference =>
-                        new CustomElement(_doc.GetElement(reference.ElementId)))
-                    .ToList();
+                yield return customElement;
             }
-            catch (Exception)
+        }
+
+        /// <summary>
+        /// Возвращает подходящие элементы из предварительно выбранных
+        /// </summary>
+        /// <param name="allowedCategories">Список разрешенных категорий</param>
+        /// <returns>Список выбранных элементов модели</returns>
+        public IEnumerable<CustomElement> GetPreSelectedElements(IEnumerable<ElementCategory> allowedCategories)
+        {
+            var elementIds = _uiApplication.ActiveUIDocument.Selection.GetElementIds();
+            if (elementIds.Any())
             {
-                return new List<CustomElement>();
+                var filter = new CategoriesSelectionFilter(allowedCategories);
+                foreach (var elementId in elementIds)
+                {
+                    var element = _uiApplication.ActiveUIDocument.Document.GetElement(elementId);
+                    if (filter.AllowElement(element))
+                    {
+                        yield return new CustomElement(element);
+                    }
+                }
             }
         }
 
@@ -117,8 +130,8 @@
         /// <param name="verticalBendingDirection">Вертикальное направление изгиба</param>
         /// <param name="horizontalBendingDirection">Горизонтальное направление изгиба</param>
         public void BendElements(
-            List<CustomElement> crossingElements,
-            List<CustomElement> allElementsToCross,
+            ICollection<CustomElement> crossingElements,
+            ICollection<CustomElement> allElementsToCross,
             int offset,
             int angle,
             Direction verticalBendingDirection,
@@ -139,126 +152,172 @@
                     errorElementIds.Add(crossingElement.Element.Id.IntegerValue);
             }
 
-            using (var t = new Transaction(_doc, "aaa"/*ModPlusAPI.Language.GetItem(_langItem, "m20")*/))
+            using (var transactionGroup = new TransactionGroup(_doc))
             {
-                try
+                transactionGroup.Start(ModPlusAPI.Language.GetFunctionLocalName(ModPlusConnector.Instance));
+
+                var abortProcess = false;
+
+                foreach (var crossingElement in passedCrossingElements)
                 {
-                    t.Start();
+                    if (abortProcess)
+                        break;
 
-                    foreach (var crossingElement in passedCrossingElements)
+                    var elementsToCross = GetElementsToCross(crossingElement, allElementsToCross).ToList();
+                    if (!elementsToCross.Any())
+                        continue;
+
+                    var elementSets = GetElementSets(elementsToCross);
+                    var lastCrossingElement = crossingElement;
+                    Connector lastElbowConnector = null;
+                    foreach (var elementSet in elementSets)
                     {
-                        var elementsToCross = GetElementsToCross(crossingElement, allElementsToCross).ToList();
-                        if (!elementsToCross.Any())
-                            continue;
+                        if (abortProcess)
+                            break;
 
-                        var elementSets = GetElementSets(elementsToCross);
-                        var lastCrossingElement = crossingElement;
-                        Connector lastElbowConnector = null;
-                        foreach (var elementSet in elementSets)
+                        using (var t = new Transaction(_doc, "Bend"))
                         {
-                            var bending = new Bending { Offset = offset, Angle = angle };
-                            var orientation = elementSet.Key;
-                            var elementType = elementSet.Value.First().ElementType;
-                            var directionVector = GetBendingVector(lastCrossingElement, elementSet.Value);
+                            t.Start();
 
-                            bending.Horizontal = new BendingSection(lastCrossingElement.Element, directionVector);
-                            bending.Horizontal.DetachAllConnectors();
+                            var reject = false;
 
-                            var horizontalOffset = GetOffsetVector(bending.Horizontal, offset, horizontalBendingDirection);
-
-                            var baseSectionStartPoint = new XYZ(
-                                bending.Horizontal.Start.Origin.X,
-                                bending.Horizontal.Start.Origin.Y,
-                                bending.Horizontal.Start.Origin.Z);
-                            var baseSectionEndPoint = new XYZ(
-                                bending.Horizontal.End.Origin.X,
-                                bending.Horizontal.End.Origin.Y,
-                                bending.Horizontal.End.Origin.Z);
-
-                            bending.StartHorizontal = BendingSection.Copy(lastCrossingElement, directionVector);
-                            bending.StartHorizontal.End.Origin = new XYZ(directionVector.Start.X, directionVector.Start.Y, baseSectionStartPoint.Z);
-
-                            if (lastElbowConnector != null)
-                                bending.StartHorizontal.Start.ConnectTo(lastElbowConnector);
-
-                            bending.StartInclined = BendingSection.Copy(lastCrossingElement, directionVector);
-                            bending.StartInclined.Start.Origin = bending.StartHorizontal.End.Origin;
-
-                            if (orientation == Orientation.Horizontal)
+                            try
                             {
-                                bending.StartInclined.End.Origin = new XYZ(
+                                var bending = new Bending { Offset = offset, Angle = angle };
+                                var orientation = elementSet.Key;
+                                var elementType = elementSet.Value.First().ElementType;
+                                var directionVector = GetBendingVector(lastCrossingElement, elementSet.Value);
+
+                                bending.Horizontal = new BendingSection(lastCrossingElement.Element, directionVector);
+                                bending.Horizontal.DetachAllConnectors();
+
+                                var horizontalOffset = GetOffsetVector(bending.Horizontal, offset,
+                                    horizontalBendingDirection);
+
+                                var baseSectionStartPoint = new XYZ(
+                                    bending.Horizontal.Start.Origin.X,
+                                    bending.Horizontal.Start.Origin.Y,
+                                    bending.Horizontal.Start.Origin.Z);
+                                var baseSectionEndPoint = new XYZ(
+                                    bending.Horizontal.End.Origin.X,
+                                    bending.Horizontal.End.Origin.Y,
+                                    bending.Horizontal.End.Origin.Z);
+
+                                bending.StartHorizontal = BendingSection.Copy(lastCrossingElement, directionVector);
+                                bending.StartHorizontal.End.Origin = new XYZ(
                                     directionVector.Start.X,
                                     directionVector.Start.Y,
-                                    baseSectionStartPoint.Z + ToInches(verticalOffset));
-                            }
-                            else
-                            {
-                                bending.StartInclined.End.Origin = bending.StartInclined.Start.Origin + horizontalOffset;
-                            }
+                                    baseSectionStartPoint.Z);
 
-                            if (elementType == BendingElementType.CableTray)
-                                bending.AlignToStartHorizontalSegment();
+                                if (lastElbowConnector != null)
+                                    bending.StartHorizontal.Start.ConnectTo(lastElbowConnector);
 
-                            bending.EndHorizontal = BendingSection.Copy(lastCrossingElement, directionVector);
-                            bending.EndHorizontal.Start.Origin = new XYZ(
-                                directionVector.End.X,
-                                directionVector.End.Y,
-                                baseSectionStartPoint.Z);
+                                bending.StartInclined = BendingSection.Copy(lastCrossingElement, directionVector);
+                                bending.StartInclined.Start.Origin = bending.StartHorizontal.End.Origin;
 
-                            bending.EndInclined = BendingSection
-                                .Copy(lastCrossingElement, directionVector);
-                            bending.EndInclined.End.Origin = bending.EndHorizontal.Start.Origin;
+                                if (orientation == Orientation.Horizontal)
+                                {
+                                    bending.StartInclined.End.Origin = new XYZ(
+                                        directionVector.Start.X,
+                                        directionVector.Start.Y,
+                                        baseSectionStartPoint.Z + ToInches(verticalOffset));
+                                }
+                                else
+                                {
+                                    bending.StartInclined.End.Origin =
+                                        bending.StartInclined.Start.Origin + horizontalOffset;
+                                }
 
-                            if (orientation == Orientation.Horizontal)
-                            {
-                                bending.EndInclined.Start.Origin = new XYZ(
+                                if (elementType == BendingElementType.CableTray)
+                                    bending.AlignToStartHorizontalSegment();
+
+                                bending.EndHorizontal = BendingSection.Copy(lastCrossingElement, directionVector);
+                                bending.EndHorizontal.Start.Origin = new XYZ(
                                     directionVector.End.X,
                                     directionVector.End.Y,
-                                    baseSectionEndPoint.Z + ToInches(verticalOffset));
+                                    baseSectionStartPoint.Z);
+
+                                bending.EndInclined = BendingSection
+                                    .Copy(lastCrossingElement, directionVector);
+                                bending.EndInclined.End.Origin = bending.EndHorizontal.Start.Origin;
+
+                                if (orientation == Orientation.Horizontal)
+                                {
+                                    bending.EndInclined.Start.Origin = new XYZ(
+                                        directionVector.End.X,
+                                        directionVector.End.Y,
+                                        baseSectionEndPoint.Z + ToInches(verticalOffset));
+                                }
+                                else
+                                {
+                                    bending.EndInclined.Start.Origin =
+                                        bending.EndInclined.End.Origin + horizontalOffset;
+                                }
+
+                                if (orientation == Orientation.Horizontal)
+                                {
+                                    bending.Horizontal.Start.Origin = new XYZ(
+                                        directionVector.Start.X,
+                                        directionVector.Start.Y,
+                                        baseSectionStartPoint.Z + ToInches(verticalOffset));
+                                    bending.Horizontal.End.Origin = new XYZ(
+                                        directionVector.End.X,
+                                        directionVector.End.Y,
+                                        baseSectionEndPoint.Z + ToInches(verticalOffset));
+                                }
+                                else
+                                {
+                                    bending.Horizontal.Start.Origin = new XYZ(
+                                        directionVector.Start.X,
+                                        directionVector.Start.Y,
+                                        baseSectionStartPoint.Z) + horizontalOffset;
+                                    bending.Horizontal.End.Origin = new XYZ(
+                                        directionVector.End.X,
+                                        directionVector.End.Y,
+                                        baseSectionEndPoint.Z) + horizontalOffset;
+                                }
+
+                                bending.ApplyAngleToBendingSections();
+                                bending.ApplyMinimalBendingRequirements(orientation);
+                                bending.CreateElbows(_doc, out var elbowConnectors);
+
+                                lastCrossingElement = new CustomElement(bending.EndHorizontal.Element);
+                                lastElbowConnector = GetNearestConnector(bending.EndHorizontal.End, elbowConnectors);
                             }
+                            catch (Exception e)
+                            {
+                                var bb = elementSet.Value.First().Element.get_BoundingBox(_doc.ActiveView);
+                                foreach (var uiView in _uiApplication.ActiveUIDocument.GetOpenUIViews())
+                                {
+                                    if (uiView.ViewId == _doc.ActiveView.Id)
+                                    {
+                                        uiView.ZoomAndCenterRectangle(
+                                            bb.Min - ((bb.Max - bb.Min).Normalize() * ToInches(1000)),
+                                            bb.Max + ((bb.Max - bb.Min).Normalize() * ToInches(1000)));
+                                        break;
+                                    }
+                                }
+
+                                var bendErrorWindow = new BendErrorWindow(e.Message);
+                                bendErrorWindow.ShowDialog();
+                                if (bendErrorWindow.OnExceptionVariant == OnExceptionVariant.AbortAll)
+                                    abortProcess = true;
+                                if (bendErrorWindow.OnExceptionVariant == OnExceptionVariant.RejectAndContinue)
+                                    reject = true;
+                            }
+
+                            if (reject)
+                                t.RollBack();
                             else
-                            {
-                                bending.EndInclined.Start.Origin = bending.EndInclined.End.Origin + horizontalOffset;
-                            }
-
-                            if (orientation == Orientation.Horizontal)
-                            {
-                                bending.Horizontal.Start.Origin = new XYZ(
-                                    directionVector.Start.X,
-                                    directionVector.Start.Y,
-                                    baseSectionStartPoint.Z + ToInches(verticalOffset));
-                                bending.Horizontal.End.Origin = new XYZ(
-                                    directionVector.End.X,
-                                    directionVector.End.Y,
-                                    baseSectionEndPoint.Z + ToInches(verticalOffset));
-                            }
-                            else
-                            {
-                                bending.Horizontal.Start.Origin = new XYZ(
-                                                                      directionVector.Start.X,
-                                                                      directionVector.Start.Y,
-                                                                      baseSectionStartPoint.Z) + horizontalOffset;
-                                bending.Horizontal.End.Origin = new XYZ(
-                                                                    directionVector.End.X,
-                                                                    directionVector.End.Y,
-                                                                    baseSectionEndPoint.Z) + horizontalOffset;
-                            }
-
-                            bending.ApplyAngleToBendingSections();
-                            bending.ApplyMinimalBendingRequirements(orientation);
-                            bending.CreateElbows(_doc, out var elbowConnectors);
-
-                            lastCrossingElement = new CustomElement(bending.EndHorizontal.Element);
-                            lastElbowConnector = GetNearestConnector(bending.EndHorizontal.End, elbowConnectors);
+                                t.Commit();
                         }
                     }
+                }
 
-                    t.Commit();
-                }
-                catch (Exception e)
-                {
-                    ExceptionBox.Show(e);
-                }
+                if (abortProcess)
+                    transactionGroup.RollBack();
+                else
+                    transactionGroup.Assimilate();
             }
 
             if (errorElementIds.Any())

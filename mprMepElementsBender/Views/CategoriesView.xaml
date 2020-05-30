@@ -8,7 +8,7 @@
                    mc:Ignorable="d"
                    d:DataContext="{d:DesignInstance viewModels:CategoriesViewModel, d:IsDesignTimeCreatable=False}"
                    d:DesignHeight="200" d:DesignWidth="200"
-                   MinHeight="200" MinWidth="200"
+                   MinHeight="200" MinWidth="200" Width="300" Height="300" ResizeMode="CanResizeWithGrip"
                    WindowStartupLocation="CenterScreen"
                    Topmost="True">
     <Window.Resources>
@@ -16,7 +16,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/ModPlusStyle;component/Styles/Controls.xaml"/>
             </ResourceDictionary.MergedDictionaries>
-            <XmlDataProvider x:Key="Lang" Source="F:/ModPlus/Languages/en-US.xml" XPath="ModPlus/mprMepElementsBender" />
+            <XmlDataProvider x:Key="Lang" Source="E:/ModPlus/Languages/en-US.xml" XPath="ModPlus/mprMepElementsBender" />
         </ResourceDictionary>
     </Window.Resources>
     <Grid>

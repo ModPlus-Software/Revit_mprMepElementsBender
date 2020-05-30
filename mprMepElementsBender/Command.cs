@@ -14,27 +14,23 @@
     [Transaction(TransactionMode.Manual)]
     public class Command : IExternalCommand
     {
-        private MainView _mainView;
-
         /// <inheritdoc />
         public Result Execute(ExternalCommandData commandData, ref string message, ElementSet elements)
         {
             try
             {
+                if (MainView.IsOpen)
+                    return Result.Cancelled;
+
                 RevitExternalEventHandler.Init();
-                if (_mainView == null)
-                {
-                    _mainView = new MainView();
-                    var viewModel = new MainViewModel(_mainView, new RevitOperationService(commandData.Application));
-                    _mainView.DataContext = viewModel;
-                    _mainView.Closed += (sender, args) => _mainView = null;
-                    _mainView.Show();
 
-                    return Result.Succeeded;
-                }
+                var mainView = new MainView(commandData.Application);
+                var viewModel = new MainViewModel(
+                    mainView, commandData.Application, new RevitOperationService(commandData.Application));
+                mainView.DataContext = viewModel;
+                mainView.Closed += (sender, args) => mainView = null;
+                mainView.Show();
 
-                _mainView.Activate();
-                _mainView.Focus();
                 return Result.Succeeded;
             }
             catch (Exception exception)
