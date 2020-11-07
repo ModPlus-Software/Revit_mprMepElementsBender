@@ -5,7 +5,6 @@
     using System.Collections.ObjectModel;
     using System.Linq;
     using System.Windows.Input;
-    using Autodesk.Revit.DB;
     using Autodesk.Revit.UI;
     using Autodesk.Revit.UI.Events;
     using Helpers;
