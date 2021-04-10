@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29613.14
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "mprMepElementsBender", "mprMepElementsBender\mprMepElementsBender.csproj", "{8C59BD96-F249-4B6C-B1E6-0C5F4613B9A2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "mprMepElementsBender", "mprMepElementsBender\mprMepElementsBender.csproj", "{8C59BD96-F249-4B6C-B1E6-0C5F4613B9A2}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "_build", "build\_build.csproj", "{6EE805FD-AB76-480D-B1CE-D4DB6DA51DA9}"
 EndProject
@@ -15,6 +15,7 @@ Global
 		R2019|x64 = R2019|x64
 		R2020|x64 = R2020|x64
 		R2021|x64 = R2021|x64
+		R2022|x64 = R2022|x64
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{8C59BD96-F249-4B6C-B1E6-0C5F4613B9A2}.Debug|x64.ActiveCfg = Debug|x64
@@ -28,6 +29,8 @@ Global
 		{8C59BD96-F249-4B6C-B1E6-0C5F4613B9A2}.R2020|x64.Build.0 = R2020|x64
 		{8C59BD96-F249-4B6C-B1E6-0C5F4613B9A2}.R2021|x64.ActiveCfg = R2021|x64
 		{8C59BD96-F249-4B6C-B1E6-0C5F4613B9A2}.R2021|x64.Build.0 = R2021|x64
+		{8C59BD96-F249-4B6C-B1E6-0C5F4613B9A2}.R2022|x64.ActiveCfg = Debug|x64
+		{8C59BD96-F249-4B6C-B1E6-0C5F4613B9A2}.R2022|x64.Build.0 = Debug|x64
 		{6EE805FD-AB76-480D-B1CE-D4DB6DA51DA9}.Debug|x64.ActiveCfg = Debug|Any CPU
 		{6EE805FD-AB76-480D-B1CE-D4DB6DA51DA9}.R2017|x64.ActiveCfg = Release|Any CPU
 		{6EE805FD-AB76-480D-B1CE-D4DB6DA51DA9}.R2017|x64.Build.0 = Release|Any CPU
@@ -39,6 +42,8 @@ Global
 		{6EE805FD-AB76-480D-B1CE-D4DB6DA51DA9}.R2020|x64.Build.0 = Release|Any CPU
 		{6EE805FD-AB76-480D-B1CE-D4DB6DA51DA9}.R2021|x64.ActiveCfg = Release|Any CPU
 		{6EE805FD-AB76-480D-B1CE-D4DB6DA51DA9}.R2021|x64.Build.0 = Release|Any CPU
+		{6EE805FD-AB76-480D-B1CE-D4DB6DA51DA9}.R2022|x64.ActiveCfg = Release|Any CPU
+		{6EE805FD-AB76-480D-B1CE-D4DB6DA51DA9}.R2022|x64.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

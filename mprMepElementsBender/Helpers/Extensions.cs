@@ -171,7 +171,11 @@
                 case StorageType.Double:
                     return asDouble
                         ? foundParameter.AsDouble().ToString(CultureInfo.InvariantCulture)
+#if R2017 || R2018 || R2019 || R2020
                         : foundParameter.AsValueString(new FormatOptions(DisplayUnitType.DUT_MILLIMETERS));
+#else
+                        : foundParameter.AsValueString(new FormatOptions(UnitTypeId.Millimeters));
+#endif
 
                 case StorageType.Integer:
                     return foundParameter.AsInteger().ToString(CultureInfo.InvariantCulture);

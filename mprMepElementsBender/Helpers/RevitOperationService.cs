@@ -55,7 +55,7 @@
         /// <returns>Значение в миллиметрах</returns>
         public static double ToMillimeters(double inches)
         {
-#if R2016 || R2017 || R2018 || R2019 || R2020
+#if R2017 || R2018 || R2019 || R2020
             return UnitUtils.ConvertFromInternalUnits(inches, DisplayUnitType.DUT_MILLIMETERS);
 #else
             return UnitUtils.ConvertFromInternalUnits(inches, UnitTypeId.Millimeters);
@@ -69,7 +69,7 @@
         /// <returns>Значение в дюймах</returns>
         public static double ToInches(double millimeters)
         {
-#if R2016 || R2017 || R2018 || R2019 || R2020
+#if R2017 || R2018 || R2019 || R2020
             return UnitUtils.ConvertToInternalUnits(millimeters, DisplayUnitType.DUT_MILLIMETERS);
 #else
             return UnitUtils.ConvertToInternalUnits(millimeters, UnitTypeId.Millimeters);
